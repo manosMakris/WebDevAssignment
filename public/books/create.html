@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a new book</title>
+    <style>
+        body {
+            background-color: rgb(111, 106, 106);
+        }
+
+        #content input,
+        select {
+            margin-bottom: 10px;
+        }
+
+        nav a {
+            display: flex;
+            flex-flow: column;
+            color: rgb(37, 205, 235);
+        }
+
+        .textBox {
+            border: 3px solid rgb(127, 170, 170);
+            border-radius: 20px;
+            background-image: linear-gradient(120deg, #3c3c3c, #585858);
+            color: rgb(127, 170, 170);
+            padding: 7px 12px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 17px;
+            transition: all 1s;
+            max-width: 170px;
+        }
+
+        .textBox:focus {
+            outline-color: rgb(127, 170, 170);
+        }
+
+        .btn {
+            position: relative;
+            font-size: 17px;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 1em 2.5em;
+            display: inline-block;
+            border-radius: 6em;
+            transition: all .2s;
+            border: none;
+            font-family: inherit;
+            font-weight: 500;
+            color: black;
+            background-color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn::after {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            width: 100%;
+            border-radius: 100px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            transition: all .4s;
+        }
+
+        .btn::after {
+            background-color: #fff;
+        }
+
+        .btn:hover::after {
+            transform: scaleX(1.4) scaleY(1.6);
+            opacity: 0;
+        }
+
+        /* Styling the select element */
+        select#genreDropDown {
+            width: 200px;
+            /* Adjust the width as needed */
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            appearance: none;
+            background-color: #fff;
+        }
+
+        /* Styling the arrow icon */
+        select#genreDropDown::after {
+            content: "\25BE";
+            /* Unicode character for a down arrow */
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        /* Styling the option elements */
+        select#genreDropDown option {
+            background-color: #fff;
+            color: #333;
+        }
+
+        /* Styling the selected option */
+        select#genreDropDown option:checked {
+            background-color: #007bff;
+            /* Change the color as desired */
+            color: #fff;
+        }
+
+        #output {
+            margin-bottom: 10px;
+            margin-right: 50%;
+            padding-left: 20px;
+            color: rgb(248, 241, 241);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Create a new book</h1>
+    <nav>
+        <a href="../index.html">Home page</a>
+        <br>
+        <a href="./create.html">Create a new book</a>
+        <br>
+        <a href="./search.html">Search a book by title keyword</a>
+        <br>
+    </nav>
+    <br>
+
+    <div id="content">
+        <form id="bookForm">
+            <label for="author">Author:</label>
+            <input type="text" id="author" class="textBox" required>
+            <br>
+            <label for="title">Title:</label>
+            <input type="text" id="title" class="textBox" required>
+            <br>
+            <label for="genreDropDown">Genre:</label>
+            <select id="genreDropDown" name="genre" required>
+                <option value="Science fiction" selected>Science fiction</option>
+                <option value="Satire">Satire</option>
+                <option value="Drama">Drama</option>
+                <option value="Action and Adventure">Action and Adventure</option>
+                <option value="Romance">Romance</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Horror">Horror</option>
+            </select>
+            <br>
+            <label for="price">Price:</label>
+            <input type="text" id="price" class="textBox" required>
+            <br>
+            <input id="submitBtn" class="btn" type="submit" value="Submit">
+        </form>
+    </div>
+
+    <div id="output">
+
+    </div>
+
+    <script>
+        // Get the book form
+        const bookForm = document.querySelector("#bookForm");
+
+        // Get output div
+        const output = document.querySelector("#output");
+
+        // Add an event listener when the user submits
+        bookForm.addEventListener("submit", async (e) => {
+
+            // Prevent the default behavior
+            e.preventDefault();
+
+            // Get all the inputs
+            const authorTextBox = document.querySelector("#author");
+            const titleTextBox = document.querySelector("#title");
+            const genreDropDown = document.getElementsByName("genre")[0];
+            const priceTextBox = document.querySelector("#price");
+
+            // Get all the values from the inputs
+            const author = authorTextBox.value;
+            const title = titleTextBox.value;
+            const genre = genreDropDown.value;
+            const priceString = priceTextBox.value;
+
+            // Check if the price is a number
+            if (isNaN(priceString)) {
+                output.textContent = "Invalid input. Price should be a number.";
+                return;
+            }
+
+            // Convert the price to a number
+            const priceNumber = Number(priceString);
+
+            // Check if the price is positive
+            if (priceNumber < 0.0) {
+                output.textContent = "Invalid input. Price should be a positive number.";
+                return;
+            }
+
+            // Create the json object to be sent as input to POST /books
+            const inputObject = {
+                author,
+                title,
+                genre,
+                price: priceNumber
+            }
+
+            // Make the server endpoint
+            const endpoint = "/books";
+
+            // Send the http request
+            const result = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(inputObject)
+            });
+
+            // Let the user know that everything went ok
+            try {
+                const response = await result.json();
+                output.textContent = response.message;
+            } catch (err) {
+                console.log(err);
+                output.textContent = response.message;
+            }
+
+            // Clear the output after 2 seconds
+            const secondsToWait = 5;
+            const secondsToMilliseconds = 1000;
+            const waitingTime = secondsToWait * secondsToMilliseconds;
+            setTimeout(() => {
+                output.textContent = '';
+            }, waitingTime);
+        });
+    </script>
+
+</body>
+
+</html>

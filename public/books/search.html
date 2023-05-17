@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search a book</title>
+    <style>
+        body {
+            background-color: rgb(111, 106, 106);
+        }
+
+        #content input {
+            margin-bottom: 10px;
+        }
+
+        nav a {
+            display: flex;
+            flex-flow: column;
+            color: rgb(37, 205, 235);
+        }
+
+        #output {
+            margin-bottom: 10px;
+            margin-right: 50%;
+            padding-left: 20px;
+            color: rgb(248, 241, 241);
+        }
+
+        #output div {
+            border: 1px solid black;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            margin-right: 50%;
+            padding-left: 20px;
+            color: rgb(248, 241, 241);
+        }
+
+        .container-input {
+            position: relative;
+            top: 10px;
+        }
+
+        .input {
+            width: 150px;
+            padding: 10px 0px 10px 40px;
+            border-radius: 9999px;
+            border: solid 1px #333;
+            transition: all .2s ease-in-out;
+            outline: none;
+            opacity: 0.8;
+        }
+
+        .container-input svg {
+            position: absolute;
+            top: 45%;
+            left: 10px;
+            transform: translate(0, -50%);
+        }
+
+        .input:focus {
+            opacity: 1;
+            width: 250px;
+        }
+
+        .btn {
+            position: relative;
+            font-size: 17px;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 1em 2.5em;
+            display: inline-block;
+            border-radius: 6em;
+            transition: all .2s;
+            border: none;
+            font-family: inherit;
+            font-weight: 500;
+            color: black;
+            background-color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn::after {
+            content: "";
+            display: inline-block;
+            height: 100%;
+            width: 100%;
+            border-radius: 100px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            transition: all .4s;
+        }
+
+        .btn::after {
+            background-color: #fff;
+        }
+
+        .btn:hover::after {
+            transform: scaleX(1.4) scaleY(1.6);
+            opacity: 0;
+        }
+
+        label {
+            font-size: 22px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Search a book</h1>
+    <nav>
+        <a href="../index.html">Home page</a>
+        <br>
+        <a href="./create.html">Create a new book</a>
+        <br>
+        <a href="./search.html">Search a book by title keyword</a>
+        <br>
+    </nav>
+
+    <div id="content">
+        <form id="searchForm">
+            <label for="keyword">Keyword:</label>
+            <div class="container-input">
+                <input type="text" id="keyword" placeholder="Search" name="text" class="input">
+                <svg fill="#000000" width="20px" height="20px" viewBox="0 0 1920 1920"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z"
+                        fill-rule="evenodd"></path>
+                </svg>
+            </div>
+            <br>
+            <input id="submitBtn" class="btn" type="submit" value="Submit">
+        </form>
+
+    </div>
+
+    <div id="output">
+
+    </div>
+
+    <script>
+        // Get the book form
+        const searchForm = document.querySelector("#searchForm");
+
+        // Get output div
+        const output = document.querySelector("#output");
+
+        // Add an event listener when the user submits
+        searchForm.addEventListener("submit", async (e) => {
+
+            // Prevent the default behavior
+            e.preventDefault();
+
+            // Clear the output
+            output.innerHTML = '';
+
+            // Get all the inputs
+            const keywordTextBox = document.querySelector("#keyword");
+
+            // Get all the values from the inputs
+            const keyword = keywordTextBox.value;
+
+            // Make the server endpoint
+            const endpoint = `/books/${keyword}`;
+
+            // Send the http request
+            const result = await fetch(endpoint, {
+                method: "GET"
+            });
+
+            // Output the result to the user.
+            try {
+                const response = await result.json();
+                const books = response.books;
+                if (books.length == 0) {
+                    output.textContent = `No books found with the keyword: ${keyword}`;
+                    return;
+                }
+
+                for (const book of books) {
+
+                    const bookWrapper = document.createElement("div");
+
+                    const authorElem = document.createElement("p");
+                    authorElem.textContent = `Author: ${book.author}`;
+
+                    bookWrapper.appendChild(authorElem);
+
+                    const titleElem = document.createElement("p");
+                    titleElem.textContent = `Title: ${book.title}`;
+
+                    bookWrapper.appendChild(titleElem);
+
+                    const genreElem = document.createElement("p");
+                    genreElem.textContent = `Genre: ${book.genre}`;
+
+                    bookWrapper.appendChild(genreElem);
+
+                    const priceElem = document.createElement("p");
+                    priceElem.textContent = `Price: ${book.price}`;
+
+                    bookWrapper.appendChild(priceElem);
+
+                    output.appendChild(bookWrapper);
+                }
+            } catch (err) {
+                const errorWrapper = document.createElement("div");
+
+                const errorElem = document.createElement("p");
+                errorElem.textContent = `${response.message}`;
+
+                errorWrapper.appendChild(errorElem);
+
+                output.appendChild(errorWrapper);
+            }
+
+        });
+    </script>
+</body>
+
+</html>
