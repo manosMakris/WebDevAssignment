@@ -5,19 +5,22 @@ async function getBookByTitleKeyword(req, res) {
     // Get the keyword
     const keyword = req.params.keyword;
 
+    if (keyword === "*") {
+        try {
+            const books = await Book.find();
+            res.set("Content-Type", "application/json");
+            res.status(200).json({ books });
+        } catch (err) {
+            res.status(500).json({ message: "The server had a database error." });
+        }
+    }
+  
     // Create the response object based on the given keyword
     try {
-        const allBooks = await Book.find();
-
-        const books = [];
-        for (const book of allBooks) {
-
-            // Case insensitive comparison
-            if (book.title.toUpperCase().includes(keyword.toUpperCase()) || keyword == "*") {
-                books.push(book);
-            }
-        }
-
+        const regex = new RegExp(keyword.toUpperCase());
+  
+        const books = await Book.find({ title: { $regex: regex, $options: 'i' } });
+  
         res.set("Content-Type", "application/json");
         res.status(200).json({ books });
     } catch (err) {
