@@ -1,32 +1,25 @@
 const Book = require("../models/Book");
 
-// Get a book based on a title keyword functions
+// Get a book based on a title keyword function
 async function getBookByTitleKeyword(req, res) {
     // Get the keyword
     const keyword = req.params.keyword;
 
-    if (keyword === "*") {
-        try {
-            const books = await Book.find();
-            res.set("Content-Type", "application/json");
-            res.status(200).json({ books });
-        } catch (err) {
-            res.status(500).json({ message: "The server had a database error." });
-        }
-    }
-  
-    // Create the response object based on the given keyword
     try {
-        const regex = new RegExp(keyword.toUpperCase());
-  
-        const books = await Book.find({ title: { $regex: regex, $options: 'i' } });
-  
-        res.set("Content-Type", "application/json");
+        let books;
+
+        if (keyword === "*") {
+            books = await Book.find();
+        } else {
+            const regex = new RegExp(keyword, "i");
+            books = await Book.find({ title: { $regex: regex } });
+        }
+
         res.status(200).json({ books });
     } catch (err) {
-        res.status(500).json({ message: "The server had a database error." });
+        res.status(500).json({ message: "The server encountered a database error." });
     }
-};
+}
 
 // Create a book function
 async function createBook(req, res) {
